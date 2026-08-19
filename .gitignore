@@ -1,0 +1,10 @@
+data/
+outputs/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.log
+logs/
+.venv/
+venv/
+.DS_Store

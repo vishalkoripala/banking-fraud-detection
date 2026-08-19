@@ -1,0 +1,15 @@
+data/
+outputs/
+tests/
+notebooks/
+.git/
+.pytest_cache/
+__pycache__/
+*.pyc
+*.log
+sample_*_txn.json
+run_pipeline.py
+generate_explainability_report.py
+README.md
+MODEL_CARD.md
+.gitignore

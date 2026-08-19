@@ -1,0 +1,17 @@
+services:
+  fraud-api:
+    build: .
+    image: fraud-api:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./logs:/app/logs  # predictions.log written here survives container restarts
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

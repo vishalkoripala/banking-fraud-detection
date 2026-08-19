@@ -1,0 +1,32 @@
+# Every version below is pinned EXACTLY, not with a floor (>=). This isn't
+# stylistic -- model/fraud_model.joblib is a fitted scikit-learn object, and
+# scikit-learn does not guarantee pickle compatibility across versions.
+# A loose "scikit-learn>=1.3" constraint previously let installs drift to a
+# different sklearn than the one that built the shipped model, which broke
+# prediction with a cryptic 'LogisticRegression' object has no attribute
+# 'multi_class' error -- fallout from multi_class being deprecated in 1.5
+# and removed in a later release. Exact pins mean anyone installing this
+# gets the identical environment the model was trained and tested in.
+#
+# If you ever see an AttributeError like that again: delete model/ and
+# rerun `python train_final_model.py` so the model is rebuilt with
+# whatever's actually installed, rather than assuming a version mismatch.
+
+# Core pipeline
+pandas==3.0.2
+numpy==2.4.4
+scikit-learn==1.8.0
+matplotlib==3.10.8
+joblib==1.5.3
+
+# Explainability
+shap==0.52.0
+
+# Serving
+fastapi==0.141.1
+uvicorn[standard]==0.52.1
+pydantic==2.13.4
+
+# Testing
+pytest==9.1.1
+httpx==0.28.1
