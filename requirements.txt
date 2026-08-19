@@ -15,7 +15,7 @@
 # Core pipeline
 pandas==3.0.2
 numpy==2.4.4
-scikit-learn==1.8.0
+scikit-learn==1.7.2
 matplotlib==3.10.8
 joblib==1.5.3
 
