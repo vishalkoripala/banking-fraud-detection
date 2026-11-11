@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Fraud Guard — Interface Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #0B1220;
+    --bg-surface: #141C2F;
+    --bg-surface-alt: #1B2540;
+    --border: #263352;
+    --text-primary: #EEF1F8;
+    --text-muted: #92A0BC;
+    --accent-blue: #57A0DE;
+    --accent-blue-dim: rgba(87, 160, 222, 0.14);
+    --risk-red: #F0565C;
+    --risk-red-dim: rgba(240, 86, 92, 0.14);
+    --safe-green: #3DBB79;
+    --safe-green-dim: rgba(61, 187, 121, 0.14);
+    --radius: 14px;
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+    --font-sans: 'IBM Plex Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg-deep);
+    background-image: radial-gradient(circle at 15% 0%, rgba(87,160,222,0.10), transparent 45%),
+                       radial-gradient(circle at 85% 8%, rgba(61,187,121,0.06), transparent 45%);
+    color: var(--text-primary); font-family: var(--font-sans); min-height: 100vh; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-blue); }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 30px 22px 60px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    padding-bottom: 20px; margin-bottom: 30px; border-bottom: 1px solid var(--border); }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .icon { font-size: 30px; }
+  .brand h1 { font-size: 20px; font-weight: 700; margin: 0; }
+  .brand .sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .status-pill { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+    padding: 6px 12px; border-radius: 999px; background: var(--safe-green-dim); border: 1px solid rgba(61,187,121,0.35); color: var(--safe-green); }
+  .status-pill.offline { background: var(--risk-red-dim); border-color: rgba(240,86,92,0.35); color: var(--risk-red); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .status-pill.live .dot { animation: pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .story-section { margin: 40px 0; }
+  .kicker { font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.12em;
+    color: var(--accent-blue); text-transform: uppercase; margin-bottom: 10px; }
+  .section-title { font-size: 24px; font-weight: 700; margin: 0 0 14px; line-height: 1.35; }
+  .lede { font-size: 16px; line-height: 1.7; color: #CBD3E5; margin: 0 0 22px; max-width: 62ch; }
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 6px 0; }
+
+  .stat-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+  .stat-card { flex: 1; min-width: 150px; background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px; text-align: center; }
+  .stat-card .num { font-family: var(--font-mono); font-size: 27px; font-weight: 700; }
+  .stat-card .num.red { color: var(--risk-red); }
+  .stat-card .num.green { color: var(--safe-green); }
+  .stat-card .label { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+
+  .imbalance-bar { height: 30px; border-radius: 8px; background: var(--safe-green); position: relative; margin-bottom: 16px; }
+  .imbalance-fraud-marker { position: absolute; top: -7px; right: 0; height: 44px; width: 5px; background: var(--risk-red); border-radius: 3px; }
+  .imbalance-note { font-size: 14.5px; line-height: 1.65; color: var(--text-muted); margin: 0; }
+  .imbalance-note b { color: var(--text-primary); }
+
+  .big-fact-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 22px 0; }
+  .big-fact { flex: 1; min-width: 220px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; }
+  .big-fact .ring-wrap { display: flex; align-items: center; gap: 16px; }
+  .ring { width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-weight: 700; font-size: 14px; }
+  .big-fact .fact-text { font-size: 14.5px; line-height: 1.55; color: #CBD3E5; }
+  .big-fact .fact-text b { color: var(--text-primary); }
+
+  .analogy-box { background: var(--accent-blue-dim); border: 1px solid rgba(87,160,222,0.3); border-radius: var(--radius);
+    padding: 18px 20px; font-size: 15px; line-height: 1.65; color: #DCE6F5; margin: 20px 0; }
+  .analogy-box b { color: var(--text-primary); }
+
+  .grid { display: grid; grid-template-columns: 330px 1fr; gap: 18px; align-items: start; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+  .panel h3.panel-h { font-size: 15px; font-weight: 700; margin: 0 0 8px 0; }
+  .panel .panel-note { font-size: 13.5px; line-height: 1.6; color: var(--text-muted); margin: 0 0 18px; }
+
+  .example-btn { display: block; width: 100%; text-align: left; background: var(--bg-surface-alt); border: 1px solid var(--border);
+    color: var(--text-primary); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; font-family: var(--font-sans);
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; }
+  .example-btn .tag { display: block; font-size: 12px; color: var(--text-muted); margin-top: 3px; font-weight: 400; }
+  .example-btn:hover { border-color: var(--accent-blue); background: var(--accent-blue-dim); }
+  .example-btn:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
+  .example-btn.selected { border-color: var(--accent-blue); background: var(--accent-blue-dim); }
+
+  .txn-preview { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--border); }
+  .txn-preview .placeholder { font-style: italic; color: var(--text-muted); font-size: 14px; }
+
+  .amount-input-label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+  .amount-input-row { display: flex; align-items: center; background: var(--bg-surface-alt); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 4px 4px 4px 16px; transition: border-color 0.15s ease; }
+  .amount-input-row:focus-within { border-color: var(--accent-blue); }
+  .amount-input-row .currency { font-family: var(--font-mono); font-size: 24px; font-weight: 700; color: var(--text-muted); }
+  .amount-input { flex: 1; min-width: 0; background: none; border: none; outline: none; color: var(--text-primary);
+    font-family: var(--font-mono); font-size: 24px; font-weight: 700; padding: 10px 8px; }
+  .amount-hint { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin: 8px 0 0; }
+  .amount-hint button.reset-link { background: none; border: none; padding: 0; color: var(--accent-blue); font-size: 12px;
+    cursor: pointer; text-decoration: underline; font-family: inherit; }
+  .anon-note { font-size: 13px; color: var(--text-muted); line-height: 1.55; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border); }
+
+  button.score-btn { width: 100%; margin-top: 20px; padding: 15px; border: none; border-radius: 10px; background: var(--accent-blue);
+    color: #071019; font-family: var(--font-sans); font-size: 14.5px; font-weight: 700; cursor: pointer;
+    transition: filter 0.15s ease, transform 0.1s ease; }
+  button.score-btn:hover:not(:disabled) { filter: brightness(1.1); }
+  button.score-btn:active:not(:disabled) { transform: scale(0.99); }
+  button.score-btn:disabled { background: var(--bg-surface-alt); color: var(--text-muted); cursor: not-allowed; }
+
+  .verdict-empty { color: var(--text-muted); font-size: 14.5px; padding: 50px 0; text-align: center; }
+  .checked-with { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; font-family: var(--font-mono); }
+  .checked-with b { color: var(--text-primary); }
+  .verdict-badge-big { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-radius: var(--radius); margin-bottom: 20px; }
+  .verdict-badge-big.risk { background: var(--risk-red-dim); border: 1px solid rgba(240,86,92,0.4); }
+  .verdict-badge-big.safe { background: var(--safe-green-dim); border: 1px solid rgba(61,187,121,0.4); }
+  .verdict-badge-big .emoji { font-size: 34px; }
+  .verdict-badge-big .msg { font-size: 17px; font-weight: 700; }
+  .verdict-badge-big.risk .msg { color: var(--risk-red); }
+  .verdict-badge-big.safe .msg { color: var(--safe-green); }
+  .verdict-badge-big .sub { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; font-weight: 400; }
+
+  .sure-meter-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .sure-meter { height: 14px; border-radius: 999px; background: var(--bg-surface-alt); overflow: hidden; position: relative; }
+  .sure-meter-fill { height: 100%; width: 0%; border-radius: 999px; transition: width 0.9s cubic-bezier(.2,.7,.3,1); }
+  .sure-meter-fill.risk { background: linear-gradient(90deg, #E0964A, var(--risk-red)); }
+  .sure-meter-fill.safe { background: var(--safe-green); }
+  .sure-pct { text-align: right; font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  .clues { margin-top: 28px; }
+  .clues h4 { font-size: 15px; font-weight: 700; margin: 0 0 4px; }
+  .clues .sub { font-size: 13px; color: var(--text-muted); margin: 0 0 16px; line-height: 1.55; }
+  .clue-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .clue-row .clue-emoji { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+  .clue-row .clue-body { flex: 1; }
+  .clue-row .clue-name { font-size: 13.5px; font-weight: 700; color: var(--text-primary); }
+  .clue-row .clue-label { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; }
+  .clue-bar-track { height: 9px; border-radius: 999px; background: var(--bg-surface-alt); overflow: hidden; }
+  .clue-bar-fill { height: 100%; width: 0%; border-radius: 999px; transition: width 0.6s cubic-bezier(.2,.7,.3,1); }
+  .clue-bar-fill.risk { background: var(--risk-red); }
+  .clue-bar-fill.safe { background: var(--safe-green); }
+
+  details.tech { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--border); }
+  details.tech summary { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); cursor: pointer; user-select: none; }
+  details.tech .tech-grid { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px 22px; font-family: var(--font-mono);
+    font-size: 11px; color: var(--text-muted); }
+  details.tech .tech-grid b { color: var(--text-primary); font-weight: 500; }
+  details.tech pre { margin-top: 10px; font-family: var(--font-mono); font-size: 10.5px; line-height: 1.5; color: var(--text-muted);
+    background: var(--bg-deep); border: 1px solid var(--border); border-radius: 8px; padding: 12px; overflow-x: auto; max-height: 160px; }
+
+  .scanning { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 14px; padding: 50px 0; justify-content: center; }
+  .spinner { width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--border); border-top-color: var(--accent-blue);
+    animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-box { color: var(--risk-red); font-size: 13.5px; padding: 20px 0; text-align: center; }
+
+  footer.page { margin-top: 40px; text-align: center; font-size: 12px; color: var(--text-muted); }
+  footer.page a { color: var(--text-muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sure-meter-fill, .clue-bar-fill, .status-pill.live .dot { transition: none; animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="background:#1B2540;border:1px solid #263352;border-radius:8px;padding:10px 16px;margin-bottom:20px;font-family:var(--font-mono);font-size:12px;color:#92A0BC;">
+    PREVIEW MODE &mdash; uses real captured results from actually running this API. The version in your zip connects live, including real amount experiments.
+  </div>
+
+  <header>
+    <div class="brand">
+      <span class="icon">🛡️</span>
+      <div>
+        <h1>AI Fraud Guard</h1>
+        <div class="sub">A computer program that checks purchases and catches stolen cards</div>
+      </div>
+    </div>
+    <span class="status-pill live" id="statusPill"><span class="dot"></span>LIVE</span>
+  </header>
+
+  <!-- ================= PROBLEM ================= -->
+  <section class="story-section">
+    <div class="kicker">The Problem</div>
+    <h2 class="section-title">Finding 2 fakes hiding in every 1,000 purchases</h2>
+    <p class="lede">Picture a huge pile of card purchases. Almost every single one is a real person buying something real. But every so often, one purchase is someone using a <b>stolen</b> card. Our job is to catch those — without ever accusing an honest shopper.</p>
+
+    <div class="stat-row">
+      <div class="stat-card"><div class="num">284,807</div><div class="label">real purchases we studied</div></div>
+      <div class="stat-card"><div class="num red">492</div><div class="label">were actually stolen cards</div></div>
+      <div class="stat-card"><div class="num">1 in 580</div><div class="label">how rare a fake one is</div></div>
+    </div>
+
+    <div class="imbalance-bar"><div class="imbalance-fraud-marker"></div></div>
+    <p class="imbalance-note">See that tiny red line on the end? That's <b>every single fake purchase</b>, drawn next to all the honest ones. If our guard got lazy and said "everyone's honest, always" — it would be right <b>998 times out of 1,000</b>. It would also never catch a single thief. Being "right most of the time" isn't the same as actually doing the job.</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ================= HOW WELL ================= -->
+  <section class="story-section">
+    <div class="kicker">How Well Does It Work?</div>
+    <h2 class="section-title">We tested it on 56,962 purchases it had never seen</h2>
+    <p class="lede">Before trusting any guard, you'd want to see it tested on cases it doesn't already know the answer to. So that's exactly what we did.</p>
+
+    <div class="analogy-box">🔔 Think of a smoke alarm. A good one catches real fires <b>and</b> doesn't go off every time you make toast. Our guard has to do both jobs at once — catch real thieves, and leave honest shoppers alone.</div>
+
+    <div class="big-fact-row">
+      <div class="big-fact">
+        <div class="ring-wrap">
+          <div class="ring" style="background:conic-gradient(var(--risk-red) 0% 81%, var(--bg-surface-alt) 81% 100%); color:var(--risk-red);">81%</div>
+          <div class="fact-text">Out of <b>98 real</b> stolen-card purchases in the test, our guard caught <b>79</b> of them.</div>
+        </div>
+      </div>
+      <div class="big-fact">
+        <div class="ring-wrap">
+          <div class="ring" style="background:conic-gradient(var(--safe-green) 0% 100%, var(--bg-surface-alt) 100% 100%); color:var(--safe-green);">99.97%</div>
+          <div class="fact-text">Out of <b>56,864 honest</b> purchases, it wrongly blamed only <b>16</b> of them.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ================= TRY IT ================= -->
+  <section class="story-section">
+    <div class="kicker">Try It Yourself</div>
+    <h2 class="section-title">Check a purchase, live — even change the amount</h2>
+    <p class="lede">Start from one of two real purchases below. You can even change the dollar amount yourself and see if it changes our guard's mind.</p>
+
+    <div class="grid">
+      <div class="panel">
+        <h3 class="panel-h">Step 1 — Pick a purchase</h3>
+        <p class="panel-note">Both of these are real purchases from our test pile. We already know the true answer for each — you're about to see if our guard gets it right.</p>
+
+        <button class="example-btn" id="btnFraud" onclick="loadExample('fraud')">
+          🚨 Start from a real stolen-card purchase
+          <span class="tag">this one really was fraud</span>
+        </button>
+        <button class="example-btn" id="btnLegit" onclick="loadExample('legit')">
+          ✅ Start from a real honest purchase
+          <span class="tag">this one really was normal</span>
+        </button>
+
+        <div class="txn-preview" id="txnPreview">
+          <p class="placeholder">Pick one above to begin.</p>
+        </div>
+
+        <button class="score-btn" id="scoreBtn" disabled onclick="scoreTransaction()">Check This Purchase</button>
+      </div>
+
+      <div class="panel">
+        <h3 class="panel-h">Step 2 — See the decision</h3>
+        <p class="panel-note" id="verdictIntro">Pick a purchase on the left, then press the button, to see what happens.</p>
+        <div id="verdictArea">
+          <div class="verdict-empty">Waiting for you to pick a purchase…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="page">
+    Built for an IBM Internship case study · Full technical docs at <a href="/docs">/docs</a>
+  </footer>
+</div>
+
+<script>
+const EXAMPLES = {
+  fraud: {"Time": 57007.0, "V1": -1.271244192, "V2": 2.462675269, "V3": -2.851395003, "V4": 2.324480065, "V5": -1.37224489, "V6": -0.948195687, "V7": -3.065234362, "V8": 1.166926948, "V9": -2.268770588, "V10": -4.881142927, "V11": 2.255147489, "V12": -4.686386898, "V13": 0.652374669, "V14": -6.174288348, "V15": 0.594379608, "V16": -4.849692387, "V17": -6.536520735, "V18": -3.119093882, "V19": 1.71549442, "V20": 0.560478076, "V21": 0.652941051, "V22": 0.081930976, "V23": -0.221347831, "V24": -0.523582159, "V25": 0.224228162, "V26": 0.756334523, "V27": 0.632800477, "V28": 0.250187093, "Amount": 0.01},
+  legit: {"Time": 160760.0, "V1": -0.674466065, "V2": 1.40810502, "V3": -1.110622054, "V4": -1.328365778, "V5": 1.388996033, "V6": -1.308439067, "V7": 1.885878903, "V8": -0.614232966, "V9": 0.311652212, "V10": 0.650757004, "V11": -0.857784662, "V12": -0.229961446, "V13": -0.199817005, "V14": 0.266371326, "V15": -0.046544168, "V16": -0.74139809, "V17": -0.605616644, "V18": -0.392568188, "V19": -0.162648311, "V20": 0.394321821, "V21": 0.08008424, "V22": 0.810033596, "V23": -0.22432723, "V24": 0.707899237, "V25": -0.135837023, "V26": 0.045102196, "V27": 0.533837219, "V28": 0.291319253, "Amount": 23.0}
+};
+let currentTxn = null;
+let currentLabel = null;
+
+const CAPTURED_PREDICTIONS = {fraud: {"fraud_probability": 1.0, "flagged": true, "threshold_used": 0.9999999157713859, "top_factors": [{"feature": "V14", "value": -6.1743, "contribution": 8.0815, "direction": "increases_risk"}, {"feature": "V10", "value": -4.8811, "contribution": 6.4245, "direction": "increases_risk"}, {"feature": "V17", "value": -6.5365, "contribution": 6.3217, "direction": "increases_risk"}, {"feature": "V12", "value": -4.6864, "contribution": 4.6504, "direction": "increases_risk"}, {"feature": "V16", "value": -4.8497, "contribution": 4.4742, "direction": "increases_risk"}], "model_name": "logistic_regression", "scoring_time_ms": 14.43}, legit: {"fraud_probability": 0.006498, "flagged": false, "threshold_used": 0.9999999157713859, "top_factors": [{"feature": "V4", "value": -1.3284, "contribution": -1.4205, "direction": "decreases_risk"}, {"feature": "V10", "value": 0.6508, "contribution": -0.7606, "direction": "decreases_risk"}, {"feature": "V16", "value": -0.7414, "contribution": 0.7054, "direction": "increases_risk"}, {"feature": "V17", "value": -0.6056, "contribution": 0.6597, "direction": "increases_risk"}, {"feature": "Time", "value": 160760.0, "contribution": -0.5776, "direction": "decreases_risk"}], "model_name": "logistic_regression", "scoring_time_ms": 11.7}};
+async function loadModelMeta() { /* preview mode: connectivity already confirmed */ }
+
+function resetAmount() {
+  document.getElementById('amountInput').value = currentTxn.Amount.toFixed(2);
+}
+
+function loadExample(which) {
+  currentTxn = EXAMPLES[which];
+  currentLabel = which;
+  document.getElementById('btnFraud').classList.toggle('selected', which === 'fraud');
+  document.getElementById('btnLegit').classList.toggle('selected', which === 'legit');
+
+  document.getElementById('txnPreview').innerHTML = `
+    <label class="amount-input-label" for="amountInput">💵 Amount spent — try changing this</label>
+    <div class="amount-input-row">
+      <span class="currency">$</span>
+      <input type="number" id="amountInput" class="amount-input" step="0.01" min="0" value="${currentTxn.Amount.toFixed(2)}">
+    </div>
+    <p class="amount-hint">This is the one detail you can experiment with. (The real amount in this example was $${currentTxn.Amount.toFixed(2)} — <button type="button" class="reset-link" onclick="resetAmount()">put it back</button>)</p>
+    <p class="anon-note">Our guard also looks at 28 other private clues about this purchase (kept secret to protect people's information). Those stay fixed from this real example — only the amount above is yours to change.</p>
+  `;
+
+  document.getElementById('scoreBtn').disabled = false;
+  document.getElementById('verdictIntro').textContent = 'Ready — press "Check This Purchase" below.';
+  document.getElementById('verdictArea').innerHTML = '<div class="verdict-empty">Waiting for you to press the button…</div>';
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function animateCount(el, target, suffix, durationMs) {
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - start) / durationMs);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = (target * eased).toFixed(1) + suffix;
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+async function scoreTransaction() {
+  if (!currentTxn) return;
+  const btn = document.getElementById('scoreBtn');
+  const area = document.getElementById('verdictArea');
+
+  const rawAmount = parseFloat(document.getElementById('amountInput').value);
+  const usedAmount = isNaN(rawAmount) ? currentTxn.Amount : Math.max(0, rawAmount);
+  const amountChanged = Math.abs(usedAmount - currentTxn.Amount) > 0.001;
+
+  btn.disabled = true;
+  document.getElementById('verdictIntro').textContent = 'Our guard is checking…';
+  area.innerHTML = '<div class="scanning"><span class="spinner"></span> checking this purchase…</div>';
+
+  await sleep(700);
+  const data = CAPTURED_PREDICTIONS[currentLabel];
+  renderVerdict(data, currentTxn.Amount, amountChanged);
+  btn.disabled = false;
+}
+
+function clueStrength(pct) {
+  if (pct >= 75) return 'a lot';
+  if (pct >= 40) return 'some';
+  return 'a little';
+}
+
+function renderVerdict(data, usedAmount, amountChanged) {
+  const pct = data.fraud_probability * 100;
+  const cls = data.flagged ? 'risk' : 'safe';
+
+  document.getElementById('verdictIntro').textContent = 'Here\'s what our guard decided:';
+
+  function clueName(feature, idx) {
+    if (feature === 'Amount') return 'How much was spent';
+    if (feature === 'Time') return 'When it happened';
+    return `Clue #${idx + 1}`;
+  }
+
+  const maxAbs = Math.max(...data.top_factors.map(x => Math.abs(x.contribution)));
+  const cluesHtml = data.top_factors.map((f, idx) => {
+    const width = maxAbs > 0 ? (Math.abs(f.contribution) / maxAbs * 100) : 0;
+    const fcls = f.direction === 'increases_risk' ? 'risk' : 'safe';
+    const emoji = f.direction === 'increases_risk' ? '🔺' : '🔻';
+    const verb = f.direction === 'increases_risk' ? 'raised suspicion' : 'lowered suspicion';
+    const name = clueName(f.feature, idx);
+    return `
+      <div class="clue-row">
+        <div class="clue-emoji">${emoji}</div>
+        <div class="clue-body">
+          <div class="clue-name">${name}</div>
+          <div class="clue-label">${verb} ${clueStrength(width)}</div>
+          <div class="clue-bar-track"><div class="clue-bar-fill ${fcls}" style="width:0%" data-w="${width.toFixed(0)}"></div></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const techFactors = data.top_factors.map(f => `${f.feature} = ${f.value}  (${f.direction})`).join('\n');
+
+  const previewNote = amountChanged
+    ? `<div class="checked-with">🔒 Preview mode can't recompute a new amount live \u2014 this result is still for the original real amount, <b>$${usedAmount.toFixed(2)}</b>. Run the real version (see your zip) to actually test different amounts.</div>`
+    : `<div class="checked-with">Checked with amount: <b>$${usedAmount.toFixed(2)}</b> (plus the 28 fixed clues from this example)</div>`;
+  document.getElementById('verdictArea').innerHTML = `
+    ${previewNote}
+
+    <div class="verdict-badge-big ${cls}">
+      <div class="emoji">${data.flagged ? '🚨' : '✅'}</div>
+      <div>
+        <div class="msg">${data.flagged ? 'This looks like a STOLEN card' : 'This looks like a HONEST purchase'}</div>
+        <div class="sub">${data.flagged ? 'Our guard says: stop and double-check this one' : 'Our guard says: nothing to worry about'}</div>
+      </div>
+    </div>
+
+    <div class="sure-meter-label"><span>Not sure at all</span><span>Completely sure</span></div>
+    <div class="sure-meter"><div class="sure-meter-fill ${cls}" id="meterFill" style="width:0%"></div></div>
+    <div class="sure-pct" id="probNum">0.0%</div>
+
+    <div class="clues">
+      <h4>Why our guard thinks this</h4>
+      <p class="sub">It checked 30 different clues about this purchase — some are shown by name below, others are private details we just number. Here are the 5 that mattered most this time:</p>
+      ${cluesHtml}
+    </div>
+
+    <details class="tech">
+      <summary>🔬 For technical reviewers — exact numbers</summary>
+      <div class="tech-grid">
+        <span>model: <b>${data.model_name}</b></span>
+        <span>exact probability: <b>${data.fraud_probability}</b></span>
+        <span>decision threshold: <b>${data.threshold_used}</b></span>
+        <span>scored in: <b>${data.scoring_time_ms} ms</b></span>
+      </div>
+      <pre>${techFactors}</pre>
+    </details>
+  `;
+
+  animateCount(document.getElementById('probNum'), pct, '% sure', 900);
+  requestAnimationFrame(() => {
+    document.getElementById('meterFill').style.width = Math.min(100, pct) + '%';
+    document.querySelectorAll('.clue-bar-fill').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  });
+}
+
+loadModelMeta();
+</script>
+</body>
+</html>
